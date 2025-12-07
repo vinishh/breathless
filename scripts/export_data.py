@@ -58,7 +58,7 @@ def export_master_dataset():
             
         return clean_sdf
 
-    # Load WHO
+    # Load WHO data
     who_mortality_path = "who attribate deaths per 1000 standarised/data.csv"
     who_df = spark.read.option("header", "true").option("inferSchema", "true").csv(who_mortality_path)
     who_clean_df = who_df.select(
@@ -75,7 +75,7 @@ def export_master_dataset():
         col("FactValueNumeric").alias("PM25")
     ).filter(col("Dim1") == "Total")
 
-    # Load UN
+    # Load UN data
     un_gdp = load_un_data("un data/gdp and gdp per cap/SYB67_230_202411_GDP and GDP Per Capita.csv", "GDP", "GDP in current prices (millions of US dollars)")
     un_gdp_capita = load_un_data("un data/gdp and gdp per cap/SYB67_230_202411_GDP and GDP Per Capita.csv", "GDP_per_capita", "GDP per capita (US dollars)")
     
@@ -92,7 +92,7 @@ def export_master_dataset():
     
     un_energy = load_un_data("un data/energy/SYB67_263_202411_Production, Trade and Supply of Energy.csv", "Energy_Supply", "Primary energy production (petajoules)") 
 
-    # Join
+    # join the data
     print("Joining Data...")
     master_df = who_clean_df.join(who_pm25_clean, ["Country", "Year"], "inner")
     
@@ -101,7 +101,7 @@ def export_master_dataset():
         if df is not None:
             master_df = master_df.join(df, ["Country", "Year"], "left")
 
-    # Export
+    # export the data
     print("Exporting Master Dataset to CSV...")
     pdf_master = master_df.toPandas()
     
